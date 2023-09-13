@@ -1,0 +1,101 @@
+from asyncio import events
+from operator import index
+from selectors import EVENT_READ
+from anyio import EventStatistics
+from jupyter_events import EVENTS_METADATA_VERSION, EventLogger, EventSchema
+import helpers
+import database as db
+from tkinter import *
+from tkinter import ttk
+from tkinter.messagebox import askokcancel, WARNING
+from tkinter import messagebox
+
+
+class Messagebox:
+
+  def messagebox(self):
+   messagebox = ttk.messagebox
+
+messagebox.showinfo("Bienvenido")
+
+class MainWindow(Frame):
+
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.title("Mi primera GUI")
+        self.pack()
+
+        # Crea un widget de etiqueta
+        label = Label(self, text="¡Hola, mundo!")
+        label.pack()
+
+        # Crea un widget de botón
+        button = Button(self, text="¡Haz clic en mí!")
+        button.pack()
+
+        # Vincula el evento de clic del botón a una función de manejador
+        button.bind("<Button-1>", self.on_click)
+
+    def on_click(self):
+        print("¡Has hecho clic en el botón!")
+
+
+
+
+class CenterWidgetMixin:
+   
+    def center(self):
+      self.update()
+      w = self.winfo_width()
+      h = self.winfo_height()
+      ws = self.winfo_screenwidth()
+      hs = self.winfo_screenheight()
+      x = int(ws/2 - w/2)
+      y = int(hs/2 - h/2)
+      self.geometry(f"{w}x{h}+{x}+{y}")
+
+
+class valor:
+
+    def __init__(self, valor):
+        self.valor = valor
+
+    def __repr__(self):
+        return f"Valor({self.valor})"   
+
+
+class  CreateClientWindow(Toplevel, CenterWidgetMixin):
+   def __init__(self, parent):
+      super().__init__(parent)
+      self.title("Crear cliente")
+      self.build()
+      self.center()
+      self.transient(parent)
+      self.grab_set()
+
+      self.master.treeview.insert(
+       parent ="", index="end", iid=self.dni.get(), 
+       values=(self.dni.get(), self.nombre.get(), self.apellido.get()))
+      self.close()
+
+
+
+   def build(self):
+      frame = Frame(self)
+      frame.pack(padx=20, pady=10) 
+
+      Label(frame, text="DNI (No editable)").grid(row=0, column=0)
+      Label(frame, text="Nombre(de 2 a 30 chars)").grid(row=1, column=0)
+      Label(frame, text="Apellido (de 2 a 30 chars)").grid(row=2, column=0)
+
+      dni = Entry(frame)
+      dni.grid(row=0, column=1)
+      dni.config(validate="key", validatecommand=self.validate_dni)
+      nombre = Entry(frame)
+      nombre.grid(row=1, column=1)
+      nombre.blind("<KeyRelease>", lambda event: self.validate.validate(event, 0))
+      nombre.config(validate="key", validatecommand=self.validate_nombre)
+      apellido = Entry(frame)
+      apellido.grid(row=2, column=1)
+      apellido.blind("<KeyRelease>", lambda event: self.validate(event, 1))
+      apellido.config(validate="key", validatecommand=self.validate_apellido)
